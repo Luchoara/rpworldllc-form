@@ -1,10 +1,19 @@
 import express from "express";
 import cors from "cors";
 import fetch from "node-fetch"; // Ahora utilizas import en vez de require
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 app.use(cors());
 app.use(express.json());
+
+// Sirve archivos estáticos
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.post("/api/proxy", async (req, res) => {
     const {
@@ -21,12 +30,6 @@ app.post("/api/proxy", async (req, res) => {
         trusted_form_cert_url,
     } = req.body;
 
-    // Validar que todos los campos requeridos estén presentes
-    /*
-		if (!publisher_id || !caller_number || !first_name || !last_name || !email) {
-        return res.status(400).json({ message: "Missing required fields" });
-    }
-		*/
     try {
         const baseURL = "https://rtb.retreaver.com/rtbs.json";
         const params = new URLSearchParams({
@@ -63,6 +66,17 @@ app.post("/api/proxy", async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
+});
+
+// Ruta para servir el index.html
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'form.html'));
+});
+
+// Escuchar en el puerto 3000
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
 
 export default app;
