@@ -64,6 +64,7 @@ app.post("/api/proxy", async (req, res) => {
             res.status(response.status).json({ message: "Error in API response" });
         }
     } catch (error) {
+        console.error("Internal server error:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 });
@@ -72,6 +73,26 @@ app.post("/api/proxy", async (req, res) => {
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'form.html'));
 });
+
+// abort controller 
+const controller = new AbortController();
+const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 segundos
+
+try {
+    const response = await fetch(fullURL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal, // Para manejar el timeout
+    });
+    clearTimeout(timeoutId);
+} catch (error) {
+    if (error.name === 'AbortError') {
+        res.status(408).json({ message: "Request timed out" });
+    } else {
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+}
+
 
 // Escuchar en el puerto 3000
 const PORT = process.env.PORT || 3000;
