@@ -1,21 +1,12 @@
-import express from "express";
-import cors from "cors";
-import fetch from "node-fetch"; // Ahora utilizas import en vez de require
-import path from 'path';
-import { fileURLToPath } from 'url';
+import express from 'express';
+import https from 'https';
 
 const app = express();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-app.use(cors());
+// Middleware para parsear JSON
 app.use(express.json());
 
-// Sirve archivos estáticos
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.post("/api/proxy", async (req, res) => {
+app.post("api/proxy", async (req, res) => {
     const {
         publisher_id,
         caller_number,
@@ -49,55 +40,40 @@ app.post("/api/proxy", async (req, res) => {
 
         const fullURL = `${baseURL}?${params.toString()}`;
         console.log("Full URL:", fullURL);
+        console.log("esto es el /api/proxy.js");
+        https.get(fullURL, (resp) => {
+            let data = '';
 
-        const response = await fetch(fullURL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
+            // Recibe datos en chunks
+            resp.on('data', (chunk) => {
+                data += chunk;
+            });
+
+            // Cuando se recibe toda la respuesta
+            resp.on('end', () => {
+                try {
+                    const parsedData = JSON.parse(data);
+                    res.status(200).json({ data: parsedData, fullURL });
+                } catch (error) {
+                    res.status(500).json({ message: "Error parsing JSON response", error: error.message });
+                }
+            });
+
+        }).on("error", (err) => {
+            console.error("Error: " + err.message);
+            console.log("api/proxy.js");
+            res.status(500).json({ message: "Internal server error", error: err.message });
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            res.status(200).json({ data, fullURL });
-        } else {
-            res.status(response.status).json({ message: "Error in API response" });
-        }
     } catch (error) {
         console.error("Internal server error:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 });
 
-// Ruta para servir el index.html
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'form.html'));
-});
-
-// abort controller 
-const controller = new AbortController();
-const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 segundos
-
-try {
-    const response = await fetch(fullURL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        signal: controller.signal, // Para manejar el timeout
-    });
-    clearTimeout(timeoutId);
-} catch (error) {
-    if (error.name === 'AbortError') {
-        res.status(408).json({ message: "Request timed out" });
-    } else {
-        res.status(500).json({ message: "Internal server error", error: error.message });
-    }
-}
-
-
-// Escuchar en el puerto 3000
+// Inicia el servidor en el puerto 3000
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
 
-export default app;
