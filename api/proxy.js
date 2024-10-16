@@ -30,6 +30,24 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
+// Definir esquema y modelo para los datos del formulario
+const formSchema = new mongoose.Schema({
+    key: String,
+    publisher_id: String,
+    caller_number: String,
+    first_name: String,
+    last_name: String,
+    email: String,
+    caller_state: String,
+    caller_zip: String,
+    attorney: String,
+    incident_date: String,
+    injured: String,
+    trusted_form_cert_url: String,
+});
+
+const Form = mongoose.model('Form', formSchema);
+
 // Middleware para autenticación JWT
 const authenticateJWT = (req, res, next) => {
     const token = req.cookies.token; // Leer token de la cookie
@@ -87,7 +105,7 @@ app.post('/login', async (req, res) => {
             // Guardar tokens en cookies seguras
             res.cookie('token', jwtToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',  // Configura 'secure' solo en producción
+                secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
                 maxAge: 15 * 60 * 1000, // 15 minutos
             });
@@ -123,17 +141,11 @@ app.post('/refresh-token', async (req, res) => {
     try {
         // Verificar si el refresh token es válido
         const user = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-        console.log('Refresh Token verificado:', user); // Log para verificar el usuario
 
         // Buscar el usuario en la base de datos
         const foundUser = await User.findOne({ username: user.id });
 
-        if (!foundUser) {
-            return res.status(403).json({ message: 'Usuario no encontrado' });
-        }
-
-        // Asegúrate de que el refreshToken almacenado en la base de datos coincide
-        if (foundUser.refreshToken !== refreshToken) {
+        if (!foundUser || foundUser.refreshToken !== refreshToken) {
             return res.status(403).json({ message: 'Refresh token inválido' });
         }
 
@@ -183,7 +195,7 @@ app.get('/users', authenticateJWT, async (req, res) => {
     }
 });
 
-// Ruta protegida para manejar solicitudes al proxy
+// Ruta para manejar solicitudes al proxy
 app.post('/api/proxy', authenticateJWT, async (req, res) => {
     const {
         publisher_id,
@@ -243,8 +255,63 @@ app.post('/api/proxy', authenticateJWT, async (req, res) => {
     }
 });
 
-// Inicia el servidor en el puerto 3000
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// Ruta para almacenar los datos del formulario
+app.post('/api/forms', async (req, res) => {
+    const {
+        key,
+        publisher_id,
+        caller_number,
+        first_name,
+        last_name,
+        email,
+        caller_state,
+        caller_zip,
+        attorney,
+        incident_date,
+        injured,
+        trusted_form_cert_url,
+    } = req.body;
+
+    const formData = new Form({
+        key,
+        publisher_id,
+        caller_number,
+        first_name,
+        last_name,
+        email,
+        caller_state,
+        caller_zip,
+        attorney,
+        incident_date,
+        injured,
+        trusted_form_cert_url,
+    });
+
+    try {
+        await formData.save();
+        res.status(201).json({ message: 'Datos del formulario guardados correctamente' });
+    } catch (error) {
+        res.status(400).json({ message: 'Error al guardar los datos del formulario', error: error.message });
+    }
+});
+
+// Ruta para logout
+app.post('/logout', authenticateJWT, async (req, res) => {
+    const user = await User.findOne({ username: req.user.id });
+    if (user) {
+        // Limpiar el refreshToken del usuario
+        user.refreshToken = null;
+        await user.save();
+
+        res.clearCookie('token');
+        res.clearCookie('refreshToken');
+        res.status(200).json({ message: 'Logout exitoso' });
+    } else {
+        res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+});
+
+// Iniciar el servidor
+app.listen(process.env.PORT || 3000, () => {
+    console.log(`Servidor corriendo en el puerto ${process.env.PORT || 3000}`);
 });
