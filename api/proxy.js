@@ -25,6 +25,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    refreshToken: { type: String } // Agregar campo para almacenar el refreshToken
 });
 
 const User = mongoose.model('User', userSchema);
@@ -69,7 +70,7 @@ app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
     // Busca al usuario en la base de datos
-    const user = await User.findOne({ username }); // Busca en MongoDB
+    const user = await User.findOne({ username });
 
     if (user) {
         const passwordMatch = await bcrypt.compare(password, user.password);
@@ -86,17 +87,21 @@ app.post('/login', async (req, res) => {
             // Guardar tokens en cookies seguras
             res.cookie('token', jwtToken, {
                 httpOnly: true,
-                secure: true,
+                secure: process.env.NODE_ENV === 'production',  // Configura 'secure' solo en producción
                 sameSite: 'strict',
                 maxAge: 15 * 60 * 1000, // 15 minutos
             });
 
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
-                secure: true,
+                secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
             });
+
+            // Guardar el refresh token en la base de datos
+            user.refreshToken = refreshToken;
+            await user.save();
 
             res.status(200).json({ message: 'Autenticado correctamente' });
         } else {
@@ -108,35 +113,77 @@ app.post('/login', async (req, res) => {
 });
 
 // Ruta para obtener un nuevo token
-app.post('/refresh-token', (req, res) => {
+app.post('/refresh-token', async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
 
-    if (refreshToken) {
-        jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, user) => {
-            if (err) {
-                return res.status(403).json({ message: 'Refresh token inválido o expirado' });
-            }
+    if (!refreshToken) {
+        return res.status(401).json({ message: 'No hay refresh token' });
+    }
 
-            // Generar un nuevo JWT
-            const newToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-                expiresIn: '15m',
-            });
+    try {
+        // Verificar si el refresh token es válido
+        const user = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+        console.log('Refresh Token verificado:', user); // Log para verificar el usuario
 
-            res.cookie('token', newToken, {
-                httpOnly: true,
-                secure: true,
-                sameSite: 'strict',
-                maxAge: 15 * 60 * 1000, // 15 minutos
-            });
+        // Buscar el usuario en la base de datos
+        const foundUser = await User.findOne({ username: user.id });
 
-            res.status(200).json({ message: 'Token renovado' });
+        if (!foundUser) {
+            return res.status(403).json({ message: 'Usuario no encontrado' });
+        }
+
+        // Asegúrate de que el refreshToken almacenado en la base de datos coincide
+        if (foundUser.refreshToken !== refreshToken) {
+            return res.status(403).json({ message: 'Refresh token inválido' });
+        }
+
+        // Generar un nuevo JWT (access token)
+        const newAccessToken = jwt.sign({ id: foundUser.username }, process.env.JWT_SECRET, {
+            expiresIn: '15m',
         });
-    } else {
-        res.status(401).json({ message: 'No hay refresh token' });
+
+        // Generar un nuevo refresh token
+        const newRefreshToken = jwt.sign({ id: foundUser.username }, process.env.JWT_REFRESH_SECRET, {
+            expiresIn: '7d',
+        });
+
+        // Actualizar el refreshToken del usuario en la base de datos
+        foundUser.refreshToken = newRefreshToken;
+        await foundUser.save();
+
+        // Renovar el token en las cookies
+        res.cookie('token', newAccessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 15 * 60 * 1000, // 15 minutos
+        });
+
+        res.cookie('refreshToken', newRefreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+        });
+
+        res.status(200).json({ message: 'Token renovado' });
+    } catch (err) {
+        console.error('Error al renovar el token:', err); // Log de error
+        return res.status(403).json({ message: 'Refresh token inválido o expirado' });
     }
 });
 
-// Ruta para manejar las solicitudes al proxy
+// Ruta para obtener todos los usuarios registrados
+app.get('/users', authenticateJWT, async (req, res) => {
+    try {
+        const users = await User.find({}, { password: 0 }); // Excluye la contraseña
+        res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener usuarios', error: error.message });
+    }
+});
+
+// Ruta protegida para manejar solicitudes al proxy
 app.post('/api/proxy', authenticateJWT, async (req, res) => {
     const {
         publisher_id,
@@ -174,12 +221,10 @@ app.post('/api/proxy', authenticateJWT, async (req, res) => {
         https.get(fullURL, (resp) => {
             let data = '';
 
-            // Recibe datos en chunks
             resp.on('data', (chunk) => {
                 data += chunk;
             });
 
-            // Cuando se recibe toda la respuesta
             resp.on('end', () => {
                 try {
                     const parsedData = JSON.parse(data);

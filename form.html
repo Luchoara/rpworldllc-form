@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FORM</title>
+    <title>RP World Form</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -11,12 +11,11 @@
       crossorigin="anonymous"
     />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <!-- CSS CDN -->
+    <!-- CSS y Scripts de datetimepicker -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css"
     />
-    <!-- datetimepicker jQuery CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"></script>
     <!-- SweetAlert2 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -26,199 +25,122 @@
     <div class="container">
       <div class="form-div">
         <h1>RP World Form</h1>
-        <label for="publisher_id"></label>
-        <!-- PUBLISHER TEST ID 7f948b38 -->
-        <input
-          type="text"
-          id="publisher_id"
-          name="publisher_id"
-          value="7f948b38"
-          hidden="true"
-        />
+        <label for="publisher_id" hidden></label>
+        <input type="text" id="publisher_id" name="publisher_id" value="7f948b38" hidden />
+        
         <form id="formData" method="post">
           <div class="mb-3">
-            <label for="caller_number" class="form-label">caller_number</label>
-            <input
-              type="text"
-              class="form-control"
-              name="caller_number"
-              id="caller_number"
-              aria-describedby="emailHelp"
-            />
+            <label for="caller_number" class="form-label">Caller Number</label>
+            <input type="text" class="form-control" name="caller_number" id="caller_number" required />
           </div>
           <div class="mb-3">
-            <label class="form-label" for="first_name">first_name</label>
-            <input type="text" class="form-control" name="first_name" id="first_name" />
+            <label class="form-label" for="first_name">First Name</label>
+            <input type="text" class="form-control" name="first_name" id="first_name" required />
           </div>
           <div class="mb-3">
-            <label class="form-label" for="last_name">last_name</label>
-            <input type="text" class="form-control" name="last_name" id="last_name" />
+            <label class="form-label" for="last_name">Last Name</label>
+            <input type="text" class="form-control" name="last_name" id="last_name" required />
           </div>
           <div class="mb-3">
-            <label class="form-label" for="email">email</label>
-            <input type="email" class="form-control" name="email" id="email" />
+            <label class="form-label" for="email">Email</label>
+            <input type="email" class="form-control" name="email" id="email" required />
           </div>
           <div class="mb-3">
-            <label class="form-label" for="caller_state">caller_state</label>
-            <input
-              type="text"
-              class="form-control"
-              name="caller_state"
-              id="caller_state"
-            />
+            <label class="form-label" for="caller_state">Caller State</label>
+            <input type="text" class="form-control" name="caller_state" id="caller_state" required />
           </div>
           <div class="mb-3">
-            <label class="form-label" for="caller_zip">Caller zip</label>
-            <input
-              type="text"
-              class="form-control"
-              name="caller_zip"
-              id="caller_zip"
-            />
+            <label class="form-label" for="caller_zip">Caller Zip</label>
+            <input type="text" class="form-control" name="caller_zip" id="caller_zip" required />
           </div>
           <div class="mb-3">
-            <label class="form-label" for="attorney">attorney</label>
-            <input
-              type="text"
-              class="form-control"
-              name="attorney"
-              placeholder="YES / NO"
-              id="attorney"
-            />
+            <label class="form-label" for="attorney">Attorney</label>
+            <input type="text" class="form-control" name="attorney" placeholder="YES / NO" id="attorney" required />
           </div>
           <div class="mb-3">
-            <label class="form-label" for="incident_date">incident_date</label>
-            <input
-              type="text"
-              class="form-control"
-              name="incident_date"
-              placeholder="MM-DD-YYYY"
-              id="incident_date"
-            />
+            <label class="form-label" for="incident_date">Incident Date</label>
+            <input type="text" class="form-control" name="incident_date" placeholder="MM-DD-YYYY" id="incident_date" required />
           </div>
           <div class="mb-3">
-            <label class="form-label" for="injured">injured</label>
-            <input
-              type="text"
-              class="form-control"
-              name="injured"
-              placeholder="TEXT"
-              id="injured"
-            />
+            <label class="form-label" for="injured">Injured</label>
+            <input type="text" class="form-control" name="injured" placeholder="TEXT" id="injured" required />
           </div>
           <div class="mb-3">
-            <label class="form-label" for="trusted_form_cert_url">trusted_form_cert_url</label>
-            <input
-              type="text"
-              class="form-control"
-              name="trusted_form_cert_url"
-              placeholder="https://cert.trustedform.com/......"
-              id="trusted_form_cert_url"
-            />
+            <label class="form-label" for="trusted_form_cert_url">Trusted Form Cert URL</label>
+            <input type="text" class="form-control" name="trusted_form_cert_url" placeholder="https://cert.trustedform.com/......" id="trusted_form_cert_url" required />
           </div>
           <button type="submit" class="btn btn-primary">Submit</button>
         </form>
       </div>
     </div>
 
-    <!-- COPY  -->
     <script>
-      document
-        .querySelector("#formData")
-        .addEventListener("submit", async (event) => {
-          event.preventDefault();
+      document.querySelector("#formData").addEventListener("submit", async (event) => {
+        event.preventDefault();
 
-          const formData = new FormData(event.target);
-          const data = Object.fromEntries(formData.entries());
+        const formData = new FormData(event.target);
+        const data = Object.fromEntries(formData.entries());
 
-          try {
-            const response = await fetch("https://rpworldllc.com/api/proxy", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(data),
-            });
+        // Obtener el token JWT del almacenamiento local (o sessionStorage)
+        const jwtToken = localStorage.getItem("jwtToken"); // Cambia esto si usas sessionStorage
 
-            if (response.ok) {
-              const result = await response.json();
+        try {
+          const response = await fetch("https://rpworldllc.com/api/proxy", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${jwtToken}`, // Añadir el token JWT
+            },
+            body: JSON.stringify(data),
+          });
 
-              // Mostrar datos si el status es 'reserved'
-              if (result.data.status === "reserved") {
-                Swal.fire({
-                  title: "Success!",
-                  text: `UUID: ${result.data.UUID}\nStatus: ${result.data.status}\nInbound Number: ${result.data.inbound_number}\nExpires At: ${result.data.expires_at}`,
-                  icon: "success",
-                });
+          if (response.ok) {
+            const result = await response.json();
 
-                if (result.data.inbound_number) {
-                  copyToClipboard(result.data.inbound_number);
-                }
-              } 
-              // Mostrar UUID si el status es 'no-target'
-              else if (result.data.status === "no-target" && result.data.UUID) {
-                Swal.fire("No Target", `UUID: ${result.data.UUID}`, "info");
-              }
+            // Mostrar datos si el status es 'reserved'
+            if (result.data.status === "reserved") {
+              Swal.fire({
+                title: "Success!",
+                text: `UUID: ${result.data.UUID}\nStatus: ${result.data.status}\nInbound Number: ${result.data.inbound_number}\nExpires At: ${result.data.expires_at}`,
+                icon: "success",
+              });
 
-              // Copiar inbound_number si existe
               if (result.data.inbound_number) {
                 copyToClipboard(result.data.inbound_number);
               }
-            } else {
-              const errorMsg = await response.text();
-              Swal.fire("Error", errorMsg, "error");
+            } else if (result.data.status === "no-target" && result.data.UUID) {
+              Swal.fire("No Target", `UUID: ${result.data.UUID}`, "info");
             }
-          } catch (error) {
-            Swal.fire("Error", error.message, "error");
+
+          } else {
+            const errorMsg = await response.text();
+            Swal.fire("Error", errorMsg, "error");
           }
-        });
+        } catch (error) {
+          Swal.fire("Error", error.message, "error");
+        }
+      });
 
       // Función para copiar inbound_number al portapapeles
       function copyToClipboard(inboundNumber) {
         navigator.clipboard.writeText(inboundNumber).then(
           function () {
-            var toast = new bootstrap.Toast(
-              document.getElementById("copyToast")
-            );
-            toast.show();
+            Swal.fire("Copied!", "Inbound number copied to clipboard!", "success");
           },
           function (err) {
             console.error("Error copying text: ", err);
           }
         );
       }
-    </script>
-
-    <!-- Toast container -->
-    <div class="toast-container">
-      <div
-        id="copyToast"
-        class="toast"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-      >
-        <div class="toast-body">Inbound number copied!</div>
-      </div>
-    </div>
-
-    <!-- DateTime Picker Scripts -->
-    <script>
-      $(document).ready(function () {
-        $("#original_lead_submit_date").datetimepicker({
-          format: "Y-m-d H:i:s",
-          step: 15, 
-        });
-      });
 
       $(document).ready(function () {
-        $("#dob").datetimepicker({
-          format: "Y-m-d",
+        $("#incident_date").datetimepicker({
+          format: "m-d-Y",
+          timepicker: false,
         });
       });
     </script>
 
-    <!-- Bootstrap Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
   </body>
