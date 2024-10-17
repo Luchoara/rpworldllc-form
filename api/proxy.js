@@ -5,11 +5,13 @@ import bcrypt from 'bcryptjs';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import cors from 'cors'; // Importar CORS
 
 // Cargar variables de entorno
 dotenv.config();
 
 const app = express();
+app.use(cors()); // Habilitar CORS en todas las rutas
 app.use(express.json());
 app.use(cookieParser());
 
@@ -272,7 +274,7 @@ app.post('/api/forms', async (req, res) => {
         trusted_form_cert_url,
     } = req.body;
 
-    const formData = new Form({
+    const newForm = new Form({
         key,
         publisher_id,
         caller_number,
@@ -288,30 +290,15 @@ app.post('/api/forms', async (req, res) => {
     });
 
     try {
-        await formData.save();
-        res.status(201).json({ message: 'Datos del formulario guardados correctamente' });
+        await newForm.save();
+        res.status(201).json({ message: 'Datos del formulario guardados exitosamente' });
     } catch (error) {
         res.status(400).json({ message: 'Error al guardar los datos del formulario', error: error.message });
     }
 });
 
-// Ruta para logout
-app.post('/logout', authenticateJWT, async (req, res) => {
-    const user = await User.findOne({ username: req.user.id });
-    if (user) {
-        // Limpiar el refreshToken del usuario
-        user.refreshToken = null;
-        await user.save();
-
-        res.clearCookie('token');
-        res.clearCookie('refreshToken');
-        res.status(200).json({ message: 'Logout exitoso' });
-    } else {
-        res.status(404).json({ message: 'Usuario no encontrado' });
-    }
-});
-
 // Iniciar el servidor
-app.listen(process.env.PORT || 3000, () => {
-    console.log(`Servidor corriendo en el puerto ${process.env.PORT || 3000}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Servidor corriendo en el puerto ${PORT}`);
 });

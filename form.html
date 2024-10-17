@@ -190,34 +190,34 @@
             // Show initial greeting when the page loads
             showGreetingAlert();
 
-            // Form submission handler
-            document.querySelector("#formData").addEventListener("submit", async (event) => {
-                event.preventDefault();
+           // Form submission handler
+document.querySelector("#formData").addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-                const formData = new FormData(event.target);
-                const data = Object.fromEntries(formData.entries());
+    const formData = new FormData(event.target);
+    const data = Object.fromEntries(formData.entries());
 
-                try {
-                    const response = await fetch("/api/proxy", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(data),
-                    });
+    try {
+        const response = await fetch("http://localhost:3000/api/forms", { // Cambiar la URL aquí
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data), // Asegurarse de que los datos se envían en formato JSON
+        });
 
-                    if (response.ok) {
-                        const result = await response.json();
-                        // Handle server response
-                        showMessage(`Form submitted successfully: ${result.message}`, "success");
-                    } else {
-                        const errorText = await response.text();
-                        showMessage(`Error: ${errorText}`, "error");
-                    }
-                } catch (error) {
-                    showMessage(`Error submitting form: ${error}`, "error");
-                }
-            });
+        if (response.ok) {
+            const result = await response.json();
+            showMessage(`Form submitted successfully: ${result.message}`, "success");
+        } else {
+            const errorText = await response.text();
+            showMessage(`Error: ${errorText}`, "error");
+        }
+    } catch (error) {
+        showMessage(`Error submitting form: ${error}`, "error");
+    }
+});
+
 
             // Show custom message
             function showMessage(text, type) {
