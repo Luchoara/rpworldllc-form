@@ -5,6 +5,9 @@ import path from 'path';
 import https from 'https';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import dotenv from 'dotenv'; // Importar dotenv
+
+dotenv.config(); // Cargar variables de entorno
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -14,10 +17,7 @@ app.use(cors());
 app.use(express.json());
 
 // Conectar a MongoDB
-mongoose.connect('mongodb+srv://federico:3GTkmnmKh2vii2CK@cluster0.d51o9.mongodb.net/rpsolutions?retryWrites=true&w=majority&appName=Cluster0', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
+mongoose.connect(process.env.MONGODB_URI)
 .then(() => console.log('Conectado a MongoDB'))
 .catch(err => console.error('Error de conexión a MongoDB:', err));
 
@@ -100,7 +100,7 @@ app.post('/test/api/proxy', async (req, res) => {
             trusted_form_cert_url,
         });
 
-        const fullURL = `${baseURL}?${params.toString()}`;
+        const fullURL = ${baseURL}?${params.toString()};
         console.log('Full URL:', fullURL);
 
         https.get(fullURL, (resp) => {
@@ -131,5 +131,5 @@ app.post('/test/api/proxy', async (req, res) => {
 // Iniciar el servidor en el puerto 3001
 const PORT = 3001;
 app.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto ${PORT}`);
+    console.log(Servidor corriendo en el puerto ${PORT});
 });

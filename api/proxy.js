@@ -15,8 +15,8 @@ app.use(cors()); // Habilitar CORS en todas las rutas
 app.use(express.json());
 app.use(cookieParser());
 
-// Conectar a la base de datos MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
+// Conectar a la base de datos MongoDB (URI temporal para pruebas)
+mongoose.connect('mongodb+srv://federico:3GTkmnmKh2vii2CK@cluster0.d51o9.mongodb.net/rpsolutions?retryWrites=true&w=majority&appName=Cluster0', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 })
