@@ -13,7 +13,7 @@ const app = express();
 
 // Configuración de CORS
 app.use(cors({
-    origin: ['https://rpworldllc.com', 'http://localhost:3000'], // Agregar tu dominio y localhost
+    origin: ['https://rpworldllc.com', 'http://localhost:3001', 'http://127.0.0.1:3002'], // Agregar tu dominio y localhost
     credentials: true // Permitir cookies
 }));
 
@@ -23,14 +23,14 @@ app.use(cookieParser());
 // Crear conexión a la base de datos SQL
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
-    user: process.env.DB_USERNAME, // Cambiar a DB_USERNAME según tu .env
+    user: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE, // Cambiar a DB_DATABASE según tu .env
+    database: process.env.DB_DATABASE,
 });
 
 // Middleware para autenticación JWT
 const authenticateJWT = (req, res, next) => {
-    const token = req.cookies.token; // Obtener token de las cookies
+    const token = req.cookies.token;
 
     if (token) {
         jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
@@ -52,33 +52,26 @@ app.post('/test/api/proxy', authenticateJWT, async (req, res) => {
         caller_number,
         first_name,
         last_name,
-        email,
-        caller_state,
         caller_zip,
-        attorney,
-        incident_date,
-        injured,
+        caller_state,
         trusted_form_cert_url,
     } = req.body;
 
     try {
         const baseURL = 'https://rtb.retreaver.com/rtbs.json';
         const params = new URLSearchParams({
-            key: process.env.CAMPAIGN_KEY, // Utiliza la clave de la campaña desde .env
+            key: process.env.CAMPAIGN_KEY,
             publisher_id,
             caller_number,
             first_name,
             last_name,
-            email,
-            caller_state,
             caller_zip,
-            attorney,
-            incident_date,
-            injured,
+            caller_state,
             trusted_form_cert_url,
         });
 
         const fullURL = `${baseURL}?${params.toString()}`;
+
         console.log('Full URL:', fullURL);
         
         // Realizar la solicitud a la API externa
@@ -94,8 +87,8 @@ app.post('/test/api/proxy', authenticateJWT, async (req, res) => {
                     const parsedData = JSON.parse(data);
                     // Almacenar los datos en la base de datos
                     await pool.query(
-                        'INSERT INTO caller_data (publisher_id, caller_number, first_name, last_name, email, caller_state, caller_zip, attorney, incident_date, injured, trusted_form_cert_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                        [publisher_id, caller_number, first_name, last_name, email, caller_state, caller_zip, attorney, incident_date, injured, trusted_form_cert_url]
+                        'INSERT INTO caller_data (publisher_id, caller_number, first_name, last_name, caller_zip, caller_state, trusted_form_cert_url) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                        [publisher_id, caller_number, first_name, last_name, caller_zip, caller_state, trusted_form_cert_url]
                     );
                     res.status(200).json({ data: parsedData, fullURL });
                 } catch (error) {
@@ -114,7 +107,7 @@ app.post('/test/api/proxy', authenticateJWT, async (req, res) => {
 });
 
 // Iniciar el servidor en el puerto 3001
-const PORT = process.env.PORT_PROXY || 3001; // Usa el puerto 3001 para el proxy
+const PORT = process.env.PORT_PROXY || 3001;
 
 app.listen(PORT, () => {
     console.log(`Servidor proxy corriendo en el puerto ${PORT}`);

@@ -1,70 +1,91 @@
 import express from 'express';
+import https from 'https';
+import jwt from 'jsonwebtoken';
+import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
 import mysql from 'mysql2/promise';
 import cors from 'cors';
-import path from 'path';
-import dotenv from 'dotenv';
 
-dotenv.config(); // Cargar variables de entorno
+// Cargar variables de entorno
+dotenv.config();
 
 const app = express();
-app.use(cors({
-    origin: [
-        'http://localhost:3001', // Permitir localhost en modo desarrollo
-        'https://rpworldllc.com'  // Permitir el dominio en producción
-    ],
-    credentials: true // Permitir cookies
-}));
-app.use(express.json());
 
-// Crear conexión a la base de datos SQL
+// Configuración de CORS
+app.use(cors({
+    origin: ['https://rpworldllc.com', 'http://localhost:3001', 'http://127.0.0.1:3002'],
+    credentials: true
+}));
+
+app.use(express.json());
+app.use(cookieParser());
+
+// Crear conexión a la base de datos SQL como un "pool"
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE
+    database: process.env.DB_DATABASE,
 });
 
-// Ruta para probar la conexión a la base de datos
-app.get('/test/db-connection', async (req, res) => {
-    try {
-        await pool.query('SELECT 1'); // Consulta simple para probar la conexión
-        res.status(200).json({ message: "Conexión a la base de datos exitosa" });
-    } catch (error) {
-        console.error('Error de conexión:', error.message);
-        res.status(500).json({ message: "Error de conexión a la base de datos", error: error.message });
-    }
-});
+// Middleware de autenticación JWT
+const authenticateJWT = (req, res, next) => {
+    const token = req.header('Authorization') && req.header('Authorization').split(' ')[1];
+    if (!token) return res.status(401).json({ message: 'Acceso no autorizado' });
 
-// Ruta de prueba simple
-app.get('/test/ping', (req, res) => {
-    res.status(200).send('Pong');
-});
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) return res.status(403).json({ message: 'Token inválido' });
 
-// Ruta para servir el formulario
-app.get('/test/form', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public_html', 'form.html'), (err) => {
-        if (err) {
-            console.error("Error serving form.html:", err.message);
-            res.status(500).json({ message: "Error serving form.html", error: err.message });
-        }
+        req.user = user;
+        next();
     });
-});
+};
 
-// Ruta para almacenar datos del formulario en SQL
-app.post('/test/api/forms', async (req, res) => {
-    const { publisher_id, caller_number, first_name, last_name, caller_zip, caller_state, trusted_form_cert_url } = req.body;
+// Ruta para recibir datos del formulario
+app.post('/api/form', authenticateJWT, async (req, res) => {
+    const {
+        publisher_id,
+        caller_number,
+        first_name,
+        last_name,
+        caller_zip,
+        caller_state,
+        trusted_form_cert_url
+    } = req.body;
+
+    // Validación de los datos recibidos
+    if (!publisher_id || !caller_number || !first_name || !last_name || !caller_zip || !caller_state || !trusted_form_cert_url) {
+        return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+    }
+
+    // Inserción en la base de datos
+    const query = `
+        INSERT INTO form_data (publisher_id, caller_number, first_name, last_name, caller_zip, caller_state, trusted_form_cert_url) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
 
     try {
-        const [result] = await pool.query('INSERT INTO form_data (publisher_id, caller_number, first_name, last_name, caller_zip, caller_state, trusted_form_cert_url) VALUES (?, ?, ?, ?, ?, ?, ?)', [publisher_id, caller_number, first_name, last_name, caller_zip, caller_state, trusted_form_cert_url]);
-        res.status(200).json({ message: 'Datos del formulario almacenados correctamente', id: result.insertId });
-    } catch (error) {
-        console.error('Error al almacenar los datos del formulario:', error.message);
-        res.status(500).json({ message: 'Error al almacenar los datos del formulario', error: error.message });
+        const [result] = await pool.query(query, [publisher_id, caller_number, first_name, last_name, caller_zip, caller_state, trusted_form_cert_url]);
+        res.status(200).json({ message: 'Datos guardados exitosamente', data: result });
+    } catch (err) {
+        console.error('Error al insertar en la base de datos:', err);
+        res.status(500).json({ message: 'Error interno del servidor' });
     }
 });
 
-// Iniciar el servidor en el puerto 3002
-const PORT = process.env.PORT || 3002;
+// Ruta de autenticación para generar JWT
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+    if (username === process.env.TEST_USERNAME && password === process.env.TEST_PASSWORD) {
+        const user = { username };
+        const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.json({ token });
+    } else {
+        res.status(401).json({ message: 'Credenciales incorrectas' });
+    }
+});
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
