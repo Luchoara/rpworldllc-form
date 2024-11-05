@@ -1,0 +1,52 @@
+RewriteEngine On
+
+# Asegurar que la ruta 'test/api/forms' permita POST
+RewriteCond %{REQUEST_METHOD} ^(GET|POST)$ [NC]
+RewriteRule ^test/api/forms/?$ http://localhost:3002/test/api/forms [P,L]
+
+# Redireccionamiento para entornos locales en los puertos 3001 y 3002
+RewriteCond %{HTTP_HOST} ^127\.0\.0\.1 [OR]
+RewriteCond %{HTTP_HOST} ^localhost
+
+# Redirigir '/api/proxy' a localhost en el puerto 3001
+RewriteRule ^api/proxy/?$ http://localhost:3001/api/proxy [P,L]
+
+# Redirigir '/test/form' a localhost en el puerto 3002
+RewriteRule ^test/form/?$ http://localhost:3002/test/form [P,L]
+
+# Redirigir '/test/proxy' a localhost en el puerto 3001
+RewriteRule ^test/proxy/?$ http://localhost:3001/test/proxy [P,L]
+
+# Redirigir '/test/api-test' a localhost en el puerto 3002
+RewriteRule ^test/api-test/?$ http://localhost:3002/test/api-test [P,L]
+
+# Proxy requests to /api/ to the local server running on port 3000
+RewriteCond %{REQUEST_URI} ^/api/.*$
+RewriteRule ^(.*)$ http://localhost:3000/$1 [P,L]
+
+# Bloquear el listado de directorios
+Options -Indexes
+
+# Reescribir URLs para ocultar la extensi贸n .html
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.html -f
+RewriteRule ^([^/]+)/?$ $1.html [L]
+
+# Asegurar que 'form' sin extensi贸n redirija a 'form.html'
+RewriteCond %{REQUEST_URI} ^(.*/)?form$ [NC]
+RewriteCond %{REQUEST_FILENAME}\.html -f
+RewriteRule ^(.*/)?form$ $1form.html [L]
+
+# Excepci贸n para archivos est谩ticos
+RewriteCond %{REQUEST_URI} \.(jpg|jpeg|png|gif|css|js)$ [NC]
+RewriteRule ^(.*)$ - [L]
+
+# Denegar acceso directo a archivos que no sean "form.html", "form" o "conexion.php"
+RewriteCond %{REQUEST_URI} !^(.*/)?(form|conexion)(?:\.html|\.php)?$ [NC]
+RewriteRule ^(.*)$ - [R=403,L]
+
+# php -- BEGIN cPanel-generated handler, do not edit
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php80 .php .php8 .phtml
+</IfModule>
+# php -- END cPanel-generated handler, do not edit
