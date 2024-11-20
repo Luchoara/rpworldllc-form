@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Direct Post Leads - 803Coyote</title>
+		<link
+			href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+			rel="stylesheet"
+			integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+			crossorigin="anonymous"
+		/>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css"
+		/>
+		<link rel="stylesheet" href="styles.css" />
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"></script>
+		<style>
+			#messageBox {
+				display: none;
+				background-color: lightgrey;
+				padding: 20px;
+				border-radius: 5px;
+				position: fixed;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				z-index: 1000;
+			}
+			#sendingMessage {
+				display: none;
+				color: blue;
+			}
+			#conditionsSection {
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="form-div">
+				<form id="formData" method="post">
+					<div class="form-container">
+						<div class="header">
+							<h2>Direct Post Leads</h2>
+							<div class="campaign-name">
+								<h1>803Coyote</h1>
+							</div>
+						</div>
+						<div class="form-section">
+							<input
+								type="text"
+								id="ApiToken"
+								name="ApiToken"
+								value="8C44E46F-91D3-4696-9F9A-58F53925F441"
+								hidden
+								required
+							/>
+							<input
+								type="text"
+								id="Vertical"
+								name="Vertical"
+								value="Medicare"
+								hidden
+								required
+							/>
+							<input
+								type="text"
+								id="SubId"
+								name="SubId"
+								value="FB1"
+								hidden
+								required
+							/>
+							<input
+								type="hidden"
+								id="publisher_id"
+								name="publisher_id"
+								value="7f948b38"
+							/>
+							<div class="form-column">
+								<label for="OriginalUrl">Original URL</label>
+								<input
+									type="text"
+									id="OriginalUrl"
+									name="OriginalUrl"
+									placeholder="Original URL"
+									required
+								/>
+
+								<label for="caller_number">Caller Number</label>
+								<input
+									type="text"
+									id="caller_number"
+									name="caller_number"
+									placeholder="Phone Number"
+									required
+								/>
+
+								<label for="first_name">First Name</label>
+								<input
+									type="text"
+									id="first_name"
+									name="first_name"
+									placeholder="First Name"
+									required
+								/>
+
+								<label for="last_name">Last Name</label>
+								<input
+									type="text"
+									id="last_name"
+									name="last_name"
+									placeholder="Last Name"
+									required
+								/>
+
+								<label for="address">Address</label>
+								<input
+									type="text"
+									id="address"
+									name="address"
+									placeholder="Address"
+									required
+								/>
+
+								<label for="caller_city">City</label>
+								<input
+									type="text"
+									id="caller_city"
+									name="caller_city"
+									placeholder="City"
+									required
+								/>
+
+								<label for="caller_state">State</label>
+								<input
+									type="text"
+									id="caller_state"
+									name="caller_state"
+									placeholder="State"
+									required
+								/>
+
+								<label for="caller_zip">Zip Code</label>
+								<input
+									type="text"
+									id="caller_zip"
+									name="caller_zip"
+									placeholder="Zip Code"
+									required
+								/>
+
+								<label for="email">Email Address</label>
+								<input
+									type="email"
+									id="email"
+									name="email"
+									placeholder="Valid email address"
+									required
+								/>
+
+								<label for="IpAddress">IP Address</label>
+								<input
+									type="text"
+									id="IpAddress"
+									name="IpAddress"
+									placeholder="IP Address"
+									required
+								/>
+							</div>
+							<div class="form-column">
+								<label for="dob">Birth Date</label>
+								<input
+									type="text"
+									id="dob"
+									name="dob"
+									placeholder="YYYY-MM-DD"
+									required
+								/>
+
+								<label for="Gender">Gender</label>
+								<select id="Gender" name="Gender" required>
+									<option value="">Select an option</option>
+									<option value="Male">Male</option>
+									<option value="Female">Female</option>
+								</select>
+
+								<label for="Product">Product</label>
+								<select id="Product" name="Product" required>
+									<option value="">Select an option</option>
+									<option value="(MO) Medicare Original">
+										Medicare Original (MO)
+									</option>
+									<option value="(MA) Medicare Advantage">
+										Medicare Advantage (MA)
+									</option>
+									<option value="(MD) Medicare Part D">
+										Medicare Part D (MD)
+									</option>
+									<option value="(MS) Medicare Supplement">
+										Medicare Supplement (MS)
+									</option>
+								</select>
+
+								<label for="RelationshipToApplicant"
+									>Relationship to Applicant</label
+								>
+								<select
+									id="RelationshipToApplicant"
+									name="RelationshipToApplicant"
+									required
+								>
+									<option value="">Select an option</option>
+									<option value="Self">Self</option>
+									<option value="Spouse">Spouse</option>
+									<option value="Child">Child</option>
+									<option value="Sibling">Sibling</option>
+									<option value="Parent">Parent</option>
+									<option value="Grandparent">Grandparent</option>
+									<option value="Grandchild">Grandchild</option>
+									<option value="Other">Other</option>
+								</select>
+
+								<label for="HouseHoldIncome">Household Income</label>
+								<select id="HouseHoldIncome" name="HouseHoldIncome" required>
+									<option value="">Select an option</option>
+									<option value="Below $30,000">Below $30,000</option>
+									<option value="$30,000 - $44,999">$30,000 - $44,999</option>
+									<option value="$45,000 - $59,999">$45,000 - $59,999</option>
+									<option value="$60,000 - $74,999">$60,000 - $74,999</option>
+									<option value="Above $75,000">Above $75,000</option>
+								</select>
+
+								<label for="HouseHoldSize">Household Size</label>
+								<input
+									type="text"
+									id="HouseHoldSize"
+									name="HouseHoldSize"
+									placeholder="Household Size"
+									required
+								/>
+
+								<label for="FirstTimeBuyer">First Time Buyer</label>
+								<select id="FirstTimeBuyer" name="FirstTimeBuyer" required>
+									<option value="">Select an option</option>
+									<option value="Yes">Yes</option>
+									<option value="No">No</option>
+								</select>
+
+								<label for="Source">Source</label>
+								<input
+									type="text"
+									id="Source"
+									name="Source"
+									placeholder="Source"
+									required
+								/>
+
+								<label for="SessionLength">Session Length</label>
+								<input
+									type="text"
+									id="SessionLength"
+									name="SessionLength"
+									placeholder="Session Length"
+									required
+								/>
+
+								<label for="TcpaText">TCPA Text</label>
+								<input
+									id="TcpaText"
+									name="TcpaText"
+									placeholder="TCPA Text"
+									required
+								></input>
+							</div>
+				
+
+<fieldset id="conditionsSection" class="container">
+    <legend>Conditions</legend>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="condition-item">
+                <label>High Cholesterol:</label>
+                <input type="radio" name="HighCholesterol" value="Yes"> Yes
+                <input type="radio" name="HighCholesterol" value="No"> No
+            </div>
+            <div class="condition-item">
+                <label>Pulmonary Disease:</label>
+                <input type="radio" name="PulmonaryDisease" value="Yes"> Yes
+                <input type="radio" name="PulmonaryDisease" value="No"> No
+            </div>
+            <div class="condition-item">
+                <label>Vascular Disease:</label>
+                <input type="radio" name="VascularDisease" value="Yes"> Yes
+                <input type="radio" name="VascularDisease" value="No"> No
+            </div>
+            <div class="condition-item">
+                <label>AIDS/HIV:</label>
+                <input type="radio" name="AIDSHIV" value="Yes"> Yes
+                <input type="radio" name="AIDSHIV" value="No"> No
+            </div>
+            <div class="condition-item">
+                <label>Kidney Disease:</label>
+                <input type="radio" name="KidneyDisease" value="Yes"> Yes
+                <input type="radio" name="KidneyDisease" value="No"> No
+            </div>
+            <div class="condition-item">
+                <label>Asthma:</label>
+                <input type="radio" name="Asthma" value="Yes"> Yes
+                <input type="radio" name="Asthma" value="No"> No
+            </div>
+            <div class="condition-item">
+                <label>Cancer:</label>
+                <input type="radio" name="Cancer" value="Yes"> Yes
+                <input type="radio" name="Cancer" value="No"> No
+            </div>
+            <div class="condition-item">
+                <label>Depression:</label>
+                <input type="radio" name="Depression" value="Yes"> Yes
+                <input type="radio" name="Depression" value="No"> No
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="condition-item">
+                <label>Diabetes:</label>
+                <input type="radio" name="Diabetes" value="Yes"> Yes
+                <input type="radio" name="Diabetes" value="No"> No
+            </div>
+            <div class="condition-item">
+                <label>Heart Disease:</label>
+                <input type="radio" name="HeartDisease" value="Yes"> Yes
+                <input type="radio" name="HeartDisease" value="No"> No
+            </div>
+            <div class="condition-item">
+                <label>Liver Disease:</label>
+                <input type="radio" name="LiverDisease" value="Yes"> Yes
+                <input type="radio" name="LiverDisease" value="No"> No
+            </div>
+            <div class="condition-item">
+                <label>High Blood Pressure:</label>
+                <input type="radio" name="HighBloodPressure" value="Yes"> Yes
+                <input type="radio" name="HighBloodPressure" value="No"> No
+            </div>
+            <div class="condition-item">
+                <label>Mental Illness:</label>
+                <input type="radio" name="MentalIllness" value="Yes"> Yes
+                <input type="radio" name="MentalIllness" value="No"> No
+            </div>
+            <div class="condition-item">
+                <label>Stroke:</label>
+                <input type="radio" name="Stroke" value="Yes"> Yes
+                <input type="radio" name="Stroke" value="No"> No
+            </div>
+            <div class="condition-item">
+                <label>Alzheimer:</label>
+                <input type="radio" name="Alzheimer" value="Yes"> Yes
+                <input type="radio" name="Alzheimer" value="No"> No
+            </div>
+            <div class="condition-item">
+                <label>Alcohol Abuse:</label>
+                <input type="radio" name="AlcoholAbuse" value="Yes"> Yes
+                <input type="radio" name="AlcoholAbuse" value="No"> No
+            </div>
+        </div>
+    </div>
+</fieldset>
+
+
+					</div>
+					<button type="submit" class="submit-btn">Submit</button>
+					<p id="sendingMessage">Sending data, please wait...</p>
+					<div class="additional-info">
+						<div class="info-box">
+							<h2>Working Hours</h2>
+						</div>
+						<div class="info-box">
+							<h2>States</h2>
+						</div>
+						<div class="info-box">
+							<h2>Qualifiers</h2>
+							<p></p>
+						</div>
+					</div>
+					<div class="footer">
+						<p style="font-size: 9px">V1.2</p>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<div id="messageBox">
+		<p id="messageText" style="margin: 0"></p>
+	</div>
+
+	<script>
+		$(document).ready(function () {
+				const today = new Date().toISOString().split("T")[0];
+
+				// Configuración de datetimepicker para el campo DOB
+				$("#dob").datetimepicker({
+						format: "Y-m-d",
+						timepicker: false,
+						maxDate: today,
+				});
+
+				// Mostrar u ocultar la sección de condiciones según el producto seleccionado
+				$("#Product").on("change", function () {
+						const productValue = $(this).val();
+						if (productValue === "(MA) Medicare Advantage" || productValue === "(MS) Medicare Supplement") {
+								$("#conditionsSection").slideDown();
+						} else {
+								$("#conditionsSection").slideUp();
+						}
+				});
+
+				document
+						.querySelector("#formData")
+						.addEventListener("submit", async (event) => {
+								event.preventDefault();
+
+								const formData = new FormData(event.target);
+								const data = Object.fromEntries(formData.entries());
+
+								try {
+										// Enviar datos a dynamic_proxy.php
+										const response = await fetch(
+												"https://rpworldllc.com/leadform/dynamic_proxy.php",
+												{
+														method: "POST",
+														headers: { "Content-Type": "application/json" },
+														body: JSON.stringify(data),
+												}
+										);
+
+										if (response.ok) {
+												const responseJson = await response.json();
+
+												// *** Agregar log en consola para mostrar la respuesta de la API ***
+												console.log("Respuesta de la API:", responseJson);
+
+												// Extraer el valor de 'status' y 'Success' de la respuesta JSON
+												const apiSuccess =
+														responseJson.apiResponse &&
+														(responseJson.apiResponse.Success === "true" ||
+																responseJson.apiResponse.Success === true);
+
+												const dbSuccess =
+														responseJson.dbResponse &&
+														responseJson.dbResponse.status === "success";
+
+												// Determinar si la respuesta fue exitosa
+												const overallSuccess =
+														responseJson.status === "success" && apiSuccess && dbSuccess;
+
+												if (overallSuccess) {
+														// Mostrar mensaje de éxito en verde
+														showMessage(
+																`<ul>
+																		<li><strong>Status:</strong> ${responseJson.status}</li>
+																		<li><strong>Transaction ID:</strong> ${
+																				responseJson.apiResponse.TransactionId || "N/A"
+																		}</li>
+																		<li><strong>Environment:</strong> ${
+																				responseJson.apiResponse.Environment || "N/A"
+																		}</li>
+																		<li><strong>DB Message:</strong> ${responseJson.dbResponse.message}</li>
+																</ul>`,
+																"success"
+														);
+												} else {
+														// Mostrar mensaje de error en rojo si algo falla
+														showMessage(
+																`<ul>
+																		<li><strong>Status:</strong> ${responseJson.status}</li>
+																		<li><strong>API Success:</strong> ${apiSuccess}</li>
+																		<li><strong>DB Success:</strong> ${dbSuccess}</li>
+																		<li><strong>Respuesta completa:</strong> ${JSON.stringify(
+																				responseJson
+																		)}</li>
+																</ul>`,
+																"error"
+														);
+												}
+										} else {
+												const errorText = await response.text();
+												showMessage(`Error: ${errorText}`, "error");
+
+												// *** Agregar log en consola para mostrar el error de la respuesta ***
+												console.error("Error en la respuesta de la API:", errorText);
+										}
+								} catch (error) {
+										showMessage(`Error: ${error.message}`, "error");
+
+										// *** Agregar log en consola para mostrar el error capturado ***
+										console.error("Error al procesar la solicitud:", error);
+								}
+						});
+
+				function showMessage(message, type) {
+						const messageBox = document.getElementById("messageBox");
+						const messageText = document.getElementById("messageText");
+
+						messageText.innerHTML = message;
+						messageBox.style.backgroundColor =
+								type === "success" ? "lightgreen" : "red";
+						messageBox.style.display = "block";
+
+						setTimeout(() => {
+								messageBox.style.display = "none";
+						}, 20000);
+				}
+		});
+	
+	</script>
+	</body>
+</html>
